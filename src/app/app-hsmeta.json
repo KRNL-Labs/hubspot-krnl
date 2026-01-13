@@ -1,0 +1,44 @@
+{
+  "uid": "accessshield-app",
+  "type": "app",
+  "config": {
+    "name": "AccessShield by KRNL",
+    "description": "Secure document management with blockchain verification and identity-bound watermarking",
+    "distribution": "marketplace",
+    "auth": {
+      "type": "oauth",
+      "redirectUrls": ["https://051892e58926.ngrok-free.app/api/auth/hubspot/callback"],
+      "requiredScopes": [
+        "oauth",
+        "crm.objects.contacts.read",
+        "crm.objects.contacts.write",
+        "crm.objects.deals.read",
+        "crm.objects.deals.write",
+        "crm.objects.companies.read",
+        "crm.objects.companies.write",
+        "files"
+      ],
+      "optionalScopes": [
+        "crm.objects.custom.read",
+        "crm.objects.custom.write"
+      ]
+    },
+    "permittedUrls": {
+      "fetch": [
+        "https://api.hubapi.com",
+        "https://051892e58926.ngrok-free.app",
+        "http://localhost:8000"
+      ],
+      "iframe": [
+        "https://051892e58926.ngrok-free.app"
+      ],
+      "img": []
+    },
+    "support": {
+      "supportEmail": "support@krnl.com",
+      "documentationUrl": "https://krnl.com/docs",
+      "supportUrl": "https://krnl.com/support",
+      "supportPhone": "+1234567890"
+    }
+  }
+}

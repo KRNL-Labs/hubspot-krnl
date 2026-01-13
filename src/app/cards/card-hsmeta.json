@@ -1,0 +1,10 @@
+{
+  "uid": "document-access-card",
+  "type": "card",
+  "config": {
+    "name": "Document Access",
+    "location": "crm.record.sidebar",
+    "entrypoint": "/app/cards/DocumentAccessCard.jsx",
+    "objectTypes": ["contact", "company", "deal"]
+  }
+}

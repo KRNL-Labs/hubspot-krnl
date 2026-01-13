@@ -1,0 +1,5 @@
+/node_modules
+/src/app/cards/node_modules
+/src/app/settings/node_modules
+/src/app/webhooks/node_modules
+

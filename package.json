@@ -1,0 +1,51 @@
+{
+  "name": "hubspot-accessshield",
+  "version": "1.0.0",
+  "description": "KRNL AccessShield for HubSpot - Secure document management with blockchain verification",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "hs project dev",
+    "build": "hs project build",
+    "upload": "hs project upload",
+    "deploy": "hs project deploy",
+    "lint": "eslint src/",
+    "test": "jest",
+    "validate": "hs project validate"
+  },
+  "dependencies": {
+    "@hubspot/api-client": "^11.0.0",
+    "@hubspot/ui-extensions": "^0.11.5",
+    "axios": "^1.6.0",
+    "crypto-js": "^4.2.0",
+    "moment": "^2.29.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.22.0",
+    "@hubspot/cli": "^4.1.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "eslint": "^8.52.0",
+    "eslint-plugin-react": "^7.33.0",
+    "html-webpack-plugin": "^5.5.0",
+    "jest": "^29.7.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0"
+  },
+  "keywords": [
+    "hubspot",
+    "document-management",
+    "blockchain",
+    "security",
+    "watermarking",
+    "krnl"
+  ],
+  "author": "KRNL Labs",
+  "license": "MIT"
+}

@@ -1,0 +1,10 @@
+{
+  "uid": "document-dashboard",
+  "type": "card",
+  "config": {
+    "name": "Document Dashboard",
+    "location": "crm.record.tab",
+    "entrypoint": "/app/cards/DocumentDashboard.jsx",
+    "objectTypes": ["contact", "company", "deal"]
+  }
+}
