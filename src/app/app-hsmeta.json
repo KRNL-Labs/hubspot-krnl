@@ -26,8 +26,7 @@
     "permittedUrls": {
       "fetch": [
         "https://api.hubapi.com",
-        "https://051892e58926.ngrok-free.app",
-        "http://localhost:8000"
+        "https://051892e58926.ngrok-free.app"
       ],
       "iframe": [
         "https://051892e58926.ngrok-free.app"

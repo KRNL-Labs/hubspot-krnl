@@ -114,6 +114,8 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
       console.log('📊 Dashboard object details:', { objectId, objectType, objectTypeId: context.crm?.objectTypeId });
 
       console.log('📞 Dashboard making API calls...');
+      console.log('📞 Dashboard calling getAccessLogs with objectId:', objectId);
+
       const [statsResponse, activityResponse, documentsResponse] = await Promise.all([
         apiService.getComplianceStats(objectType, objectId),
         apiService.getAccessLogs(objectId),
@@ -122,10 +124,14 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
 
       console.log('📈 Dashboard stats response:', statsResponse);
       console.log('📈 Dashboard activity response:', activityResponse);
+      console.log('📈 Dashboard activity response logs array:', activityResponse?.logs);
+      console.log('📈 Dashboard activity response logs length:', activityResponse?.logs?.length);
       console.log('📈 Dashboard documents response:', documentsResponse);
 
       setStats(statsResponse.stats || {});
-      setRecentActivity(activityResponse.logs || []);
+      const activityLogs = activityResponse.logs || [];
+      console.log('📈 Dashboard setting recentActivity to:', activityLogs);
+      setRecentActivity(activityLogs);
       setDocuments(documentsResponse.documents || []);
 
       console.log('✅ Dashboard data loaded successfully');
@@ -266,8 +272,19 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
   const filteredActivity = recentActivity.filter(activity =>
     activity.fileName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     activity.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    activity.userEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    activity.accessHash?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     activity.accessType?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Debug logs for access history
+  console.log('🔍 Access History Debug:', {
+    recentActivityLength: recentActivity?.length,
+    recentActivitySample: recentActivity?.[0],
+    filteredActivityLength: filteredActivity?.length,
+    searchTerm,
+    hasRecentActivity: !!recentActivity && recentActivity.length > 0
+  });
 
   const complianceCoverage = stats.totalDocuments > 0
     ? Math.round((stats.blockchainRegistered / stats.totalDocuments) * 100)
@@ -411,21 +428,21 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
           <Heading level={2}>Access History</Heading>
 
           <Input
-            placeholder="Search recent activity..."
+            placeholder="Search by file name, user email, access hash..."
             value={searchTerm}
             onChange={(value) => setSearchTerm(value)}
           />
 
-          {filteredActivity.length > 0 ? (
+          {filteredActivity && filteredActivity.length > 0 ? (
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableHeader>Time</TableHeader>
-                  <TableHeader>Document</TableHeader>
-                  <TableHeader>Access Type</TableHeader>
-                  <TableHeader>User</TableHeader>
-                  <TableHeader>Status</TableHeader>
-                  <TableHeader>Session</TableHeader>
+                  <TableHeader>Access Time</TableHeader>
+                  <TableHeader>File Name</TableHeader>
+                  <TableHeader>User Email</TableHeader>
+                  <TableHeader>Access Hash</TableHeader>
+                  <TableHeader>Watermark Status</TableHeader>
+                  <TableHeader>IP Address</TableHeader>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -435,31 +452,26 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
                       <Text>{formatDate(activity.accessTimestamp)}</Text>
                     </TableCell>
                     <TableCell>
-                      <Text>{activity.fileName || 'Unknown Document'}</Text>
+                      <Text>{activity.fileName}</Text>
                     </TableCell>
                     <TableCell>
-                      <Text>{activity.accessType}</Text>
+                      <Text>{activity.userEmail}</Text>
                     </TableCell>
                     <TableCell>
-                      <Text>{activity.userName}</Text>
-                    </TableCell>
-                    <TableCell>
-                      <Text variant={getBlockchainStatusVariant(activity.blockchainStatus)}>
-                        {activity.blockchainStatus}
+                      <Text style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                        {activity.accessHash ?
+                          `${activity.accessHash.substring(0, 8)}...${activity.accessHash.slice(-6)}` :
+                          'N/A'
+                        }
                       </Text>
                     </TableCell>
                     <TableCell>
-                      {activity.sessionId ? (
-                        <LoadingButton
-                          variant="secondary"
-                          size="small"
-                          onClick={() => handleSessionView(activity.sessionId)}
-                        >
-                          View
-                        </LoadingButton>
-                      ) : (
-                        <Text variant="microcopy">N/A</Text>
-                      )}
+                      <Text variant={getBlockchainStatusVariant(activity.watermarkApplied ? 'Registered on Blockchain' : 'Pending')}>
+                        {activity.watermarkApplied ? 'Applied' : 'Not Applied'}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text variant="microcopy">{activity.ipAddress}</Text>
                     </TableCell>
                   </TableRow>
                 ))}
