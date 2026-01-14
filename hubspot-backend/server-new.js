@@ -524,6 +524,38 @@ app.get('/api/view', async (req, res) => {
     let filePath = tokenDocumentPath || tokenDocumentId || tokenRecordId || null;
     let accessHash = tokenAccessHash || null;
 
+    const resolveStoragePathFromDocumentRecords = async () => {
+      if (!supabase) {
+        throw new Error('Supabase client not available');
+      }
+
+      if (typeof filePath === 'string' && filePath.includes('/')) {
+        return filePath;
+      }
+
+      const documentRecordId = typeof tokenDocumentId === 'string' && /^\d+$/.test(tokenDocumentId)
+        ? Number.parseInt(tokenDocumentId, 10)
+        : (typeof tokenDocumentId === 'number' ? tokenDocumentId : null);
+
+      let query = supabase.from('document_records').select('storage_path');
+      if (documentRecordId) {
+        query = query.eq('id', documentRecordId);
+      } else if (documentHash) {
+        query = query.eq('document_hash', documentHash);
+      } else {
+        throw new Error('Cannot resolve storage path: missing documentId/documentHash');
+      }
+
+      const { data, error } = await query.limit(1).maybeSingle();
+      if (error) {
+        throw new Error(`Failed to query document_records: ${error.message}`);
+      }
+      if (!data || !data.storage_path) {
+        throw new Error('storage_path not found for document');
+      }
+      return data.storage_path;
+    };
+
     console.log('🗂️ Initial file resolution:', {
       filePath,
       accessHash: accessHash ? accessHash.substring(0, 10) + '...' : 'none',
@@ -577,6 +609,8 @@ app.get('/api/view', async (req, res) => {
         error: 'Session not found or missing file path/accessHash'
       });
     }
+
+    filePath = await resolveStoragePathFromDocumentRecords();
 
     console.log('📄 About to access document:', {
       documentHash,

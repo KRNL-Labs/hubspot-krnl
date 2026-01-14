@@ -2,7 +2,7 @@
   "name": "accessshield-api",
   "version": "1.0.0",
   "description": "AccessShield External API for HubSpot Integration",
-  "main": "server.js",
+  "main": "server-new.js",
   "scripts": {
     "start": "node server-new.js",
     "dev": "nodemon server-new.js",

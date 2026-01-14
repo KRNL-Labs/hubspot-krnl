@@ -181,29 +181,37 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
       const objectType = getObjectType();
       const userId = context.user?.email || context.user?.id || 'anonymous';
 
-      console.log('📞 Calling access init API...', {
-        documentHash: document.documentHash,
+      const documentHash =
+        document.documentHash ||
+        document.hash ||
+        document.document_hash ||
+        document.document_hash__c ||
+        null;
+
+      const payload = {
+        documentHash,
         documentId: document.storagePath || document.id,
-        recordType: objectType,
-        recordId: objectId,
+        recordId: objectId, // Just the numeric ID, not prefixed
         userId: userId,
         accessType: 'view',
-        fileName: document.fileName
+        fileName: document.fileName,
+        clientIP: '',
+        userAgent: navigator.userAgent
+      };
+
+      console.log('📞 Calling access init API...', {
+        ...payload,
+        recordType: objectType
       });
+
+      if (!payload.documentHash) {
+        throw new Error('Document hash not available for this file');
+      }
 
       // Call backend /api/access/init to start KRNL workflow using hubspot.fetch
       const response = await hubspot.fetch('https://051892e58926.ngrok-free.app/api/access/init', {
         method: 'POST',
-        body: {
-          documentHash: document.documentHash,
-          documentId: document.storagePath || document.id,
-          recordId: objectId, // Just the numeric ID, not prefixed
-          userId: userId,
-          accessType: 'view',
-          fileName: document.fileName,
-          clientIP: '',
-          userAgent: navigator.userAgent
-        }
+        body: payload
       });
 
       console.log('📞 Access init response status:', response.status);
@@ -217,21 +225,18 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
       const result = await response.json();
       console.log('✅ Access init success:', result);
 
-      if (result && result.viewerSessionUrl) {
+      const viewerSessionUrl = result?.viewerSessionUrl || result?.viewerUrl;
+
+      if (viewerSessionUrl) {
         // Open the viewer URL in an iframe modal
         openIframeModal({
-          uri: result.viewerSessionUrl,
+          uri: viewerSessionUrl,
           height: 800,
           width: 1200,
-          title: `Document Viewer - ${document.fileName}`,
+          title: '',
           flush: true
         }, () => {
           console.log('Document viewer modal closed');
-        });
-
-        actions.addAlert({
-          type: 'success',
-          message: 'Opening secure viewer...'
         });
       } else {
         throw new Error('No viewer URL received from access init');
@@ -428,7 +433,7 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
           <Heading level={2}>Access History</Heading>
 
           <Input
-            placeholder="Search by file name, user email, access hash..."
+            placeholder="Search by file name, user email..."
             value={searchTerm}
             onChange={(value) => setSearchTerm(value)}
           />
@@ -440,9 +445,7 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
                   <TableHeader>Access Time</TableHeader>
                   <TableHeader>File Name</TableHeader>
                   <TableHeader>User Email</TableHeader>
-                  <TableHeader>Access Hash</TableHeader>
                   <TableHeader>Watermark Status</TableHeader>
-                  <TableHeader>IP Address</TableHeader>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -458,20 +461,9 @@ const DocumentDashboard = ({ context, actions, runServerlessFunction, openIframe
                       <Text>{activity.userEmail}</Text>
                     </TableCell>
                     <TableCell>
-                      <Text style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-                        {activity.accessHash ?
-                          `${activity.accessHash.substring(0, 8)}...${activity.accessHash.slice(-6)}` :
-                          'N/A'
-                        }
-                      </Text>
-                    </TableCell>
-                    <TableCell>
                       <Text variant={getBlockchainStatusVariant(activity.watermarkApplied ? 'Registered on Blockchain' : 'Pending')}>
                         {activity.watermarkApplied ? 'Applied' : 'Not Applied'}
                       </Text>
-                    </TableCell>
-                    <TableCell>
-                      <Text variant="microcopy">{activity.ipAddress}</Text>
                     </TableCell>
                   </TableRow>
                 ))}

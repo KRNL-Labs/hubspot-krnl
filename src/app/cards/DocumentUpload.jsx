@@ -75,6 +75,22 @@ export const DocumentUpload = ({
     console.log('🔘 Selected file:', selectedFile);
   };
 
+  const handleUploadClick = () => {
+    handleDebugClick();
+
+    if (!uploadUrl) return;
+
+    actions.openIframeModal({
+      uri: uploadUrl,
+      height: 800,
+      width: 1200,
+      title: '',
+      flush: true
+    }, () => {
+      console.log('Upload modal closed');
+    });
+  };
+
   const handleClearFile = () => {
     setSelectedFile(null);
   };
@@ -108,7 +124,7 @@ export const DocumentUpload = ({
             </Flex>
           </Flex>
         ) : (
-          <Text variant="microcopy">No file selected</Text>
+          <Text variant="microcopy"></Text>
         )}
       </Flex>
 
@@ -116,11 +132,7 @@ export const DocumentUpload = ({
       <Flex gap="medium" justify="center">
         <Button
           variant="primary"
-          href={{
-            url: uploadUrl,
-            external: true
-          }}
-          onClick={handleDebugClick}
+          onClick={handleUploadClick}
           disabled={disabled || !uploadUrl}
         >
           Upload Document
@@ -129,7 +141,7 @@ export const DocumentUpload = ({
 
       {/* Instructions */}
       <Text variant="microcopy" style={{ textAlign: 'center', fontStyle: 'italic' }}>
-        Click "Upload Document" to open the upload page in a new tab
+        Click "Upload Document" to open the upload page
       </Text>
     </Flex>
   );

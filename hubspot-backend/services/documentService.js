@@ -101,6 +101,8 @@ class DocumentService {
         blockchainStatus: doc.blockchain_status,
         registrationTimestamp: doc.created_at,
         hash: doc.document_hash,
+        storageBucket: doc.storage_bucket,
+        storagePath: doc.storage_path,
         fileSize: doc.file_size,
         mimeType: doc.content_type,
         blockchainTxHash: doc.tx_hash,
